@@ -1,0 +1,14 @@
+{
+  "name": "sonos-gen",
+  "version": "1.0.0",
+  "description": "Simple node server to display current song",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martin Werner <martin@thegeneration.se>",
+  "license": "MIT",
+  "dependencies": {
+    "sonos": "^0.12.1"
+  }
+}
