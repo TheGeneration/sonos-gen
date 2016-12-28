@@ -3,10 +3,15 @@ var sonos = require('sonos');
 
 const PORT = 7544;
 
-var currentSong = 'Paused';
+var currentTrack = '';
+var currentState = 'paused';
 
 function handleRequest(req, res) {
-	res.end(currentSong);
+	res.setHeader('Content-Type', 'application/json');
+	res.end(JSON.stringify({
+		'track': currentTrack,
+		'state': currentState
+	}));
 }
 
 var server = http.createServer(handleRequest);
@@ -17,30 +22,58 @@ server.listen(PORT, function() {
 });
 
 // var sonosDevicePollInterval = 30 * 1000;
-var sonosSongPollInterval = 10 * 1000;
+var sonosDataPollInterval = 1000;
 
 var sonosDevice = false;
 
 function deviceSearchCallback(device) {
-	sonosDevice = false;
+	console.log('SONOS device found!');
+
+	if(sonosDevice !== false) {
+		return;
+	}
 
 	sonosDevice = device;
 
-	currentSongPoll();
+	initDataPoll();
 }
 
+console.log('Searching for SONOS device...');
 sonos.search(deviceSearchCallback);
 
-function currentSongPoll() {
+function initDataPoll() {
+	currentTrackPoll();
+	currentStatePoll();
+}
+
+function currentTrackPoll() {
 	sonosDevice.currentTrack(function(err, track) {
-		if(err) {
+		if(err || typeof(track.title) === 'undefined') {
+			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
+			sonosDevice = false;
 			sonos.search(deviceSearchCallback);
 		} else {
-			currentSong = track;
+			currentTrack = track.title;
 
 			setTimeout(function() {
-				currentSongPoll();
-			}, sonosSongPollInterval);
+				currentTrackPoll();
+			}, sonosDataPollInterval);
+		}
+	});
+}
+
+function currentStatePoll() {
+	sonosDevice.getCurrentState(function(err, state) {
+		if(err || typeof(state) === 'undefined') {
+			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
+			sonosDevice = false;
+			sonos.search(deviceSearchCallback);
+		} else {
+			currentState = state;
+
+			setTimeout(function() {
+				currentStatePoll();
+			}, sonosDataPollInterval);
 		}
 	});
 }
