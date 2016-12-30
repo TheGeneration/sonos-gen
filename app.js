@@ -3,7 +3,7 @@ var sonos = require('sonos');
 
 const PORT = 7544;
 
-var currentTrack = '';
+var currentTrack = {};
 var currentState = 'paused';
 
 function handleRequest(req, res) {
@@ -27,11 +27,11 @@ var sonosDataPollInterval = 1000;
 var sonosDevice = false;
 
 function deviceSearchCallback(device) {
-	console.log('SONOS device found!');
-
 	if(sonosDevice !== false) {
 		return;
 	}
+
+	console.log('SONOS device found!');
 
 	sonosDevice = device;
 
@@ -47,13 +47,21 @@ function initDataPoll() {
 }
 
 function currentTrackPoll() {
+	if(sonosDevice === false) {
+		sonos.search(deviceSearchCallback);
+	}
+
 	sonosDevice.currentTrack(function(err, track) {
 		if(err || typeof(track.title) === 'undefined') {
 			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
 			sonosDevice = false;
 			sonos.search(deviceSearchCallback);
 		} else {
-			currentTrack = track.title;
+			currentTrack = {
+				name: track.artist + ' - ' + track.title,
+				duration: track.duration,
+				position: track.position
+			};
 
 			setTimeout(function() {
 				currentTrackPoll();
@@ -63,6 +71,10 @@ function currentTrackPoll() {
 }
 
 function currentStatePoll() {
+	if(sonosDevice === false) {
+		sonos.search(deviceSearchCallback);
+	}
+
 	sonosDevice.getCurrentState(function(err, state) {
 		if(err || typeof(state) === 'undefined') {
 			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
