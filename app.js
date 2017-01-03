@@ -1,5 +1,10 @@
-var http = require('http');
-var sonos = require('sonos');
+const http = require('http'),
+	tls = require('tls'),
+	fs = require('fs'),
+	crypto = require('crypto'),
+	sonos = require('sonos');
+
+
 
 const PORT = 7544;
 
@@ -8,13 +13,30 @@ var currentState = 'paused';
 
 function handleRequest(req, res) {
 	res.setHeader('Content-Type', 'application/json');
+	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.end(JSON.stringify({
 		'track': currentTrack,
 		'state': currentState
 	}));
 }
 
-var server = http.createServer(handleRequest);
+var server;
+
+if(process.env.USE_SSL) {
+	var privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_FILE).toString();
+	var cert = fs.readFileSync(process.env.CERT_CERTIFICATE_FILE).toString();
+
+	var serverOptions = {
+		key: privateKey,
+		cert: cert
+	};
+
+	tls.createServer(serverOptions);
+} else {
+	http.createServer();
+}
+
+server.addListener('request', handleRequest);
 
 server.listen(PORT, function() {
 	console.log('=== Generation Sonos Server ===');

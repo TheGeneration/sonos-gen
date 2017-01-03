@@ -9,6 +9,7 @@
   "author": "Martin Werner <martin@thegeneration.se>",
   "license": "MIT",
   "dependencies": {
+    "node-env-file": "^0.1.8",
     "sonos": "^0.12.1"
   }
 }
