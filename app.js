@@ -47,7 +47,7 @@ server.listen(PORT, function() {
 });
 
 // var sonosDevicePollInterval = 30 * 1000;
-var sonosDataPollInterval = 1000 * 15;
+var sonosDataPollInterval = 1000 * 1;
 
 var sonosDevice = false;
 
@@ -57,6 +57,8 @@ function deviceSearchCallback(device) {
 	}
 
 	console.log('SONOS device found!');
+
+	console.log(device);
 
 	sonosDevice = device;
 
@@ -75,78 +77,77 @@ function initDataPoll() {
 function currentTrackPoll() {
 	console.log('Polling track');
 
-	if(sonosDevice === false || typeof sonosDevice.currentTrack !== 'function') {
-		sonos.search(deviceSearchCallback);
-		currentTrack = {};
+	if(typeof sonosDevice.currentTrack !== 'function') {
+		setTimeout(function() {
+			currentTrackPoll();
+		}, sonosDataPollInterval);
 		return;
 	}
 
-	sonosDevice.currentTrack(function(err, track) {
+	request = sonosDevice.currentTrack(function(err, track) {
 		if(err || typeof(track.title) === 'undefined') {
-			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
+			console.log('Couldn\'t fetch track title.');
 			console.log(err, track);
-			sonosDevice = false;
-			sonos.search(deviceSearchCallback);
 		} else {
 			currentTrack = {
 				name: track.artist + ' - ' + track.title,
 				duration: track.duration,
 				position: track.position
 			};
-
-			setTimeout(function() {
-				currentTrackPoll();
-			}, sonosDataPollInterval);
 		}
+
+		setTimeout(function() {
+			currentTrackPoll();
+		}, sonosDataPollInterval);
 	});
 }
 
 function currentStatePoll() {
 	console.log('Polling state');
 
-	if(sonosDevice === false || typeof sonosDevice.getCurrentState !== 'function') {
-		sonos.search(deviceSearchCallback);
-		currentState = 'stopped';
+	if(typeof sonosDevice.getCurrentState !== 'function') {
+		setTimeout(function() {
+			currentStatePoll();
+		}, sonosDataPollInterval);
 		return;
 	}
 
 	sonosDevice.getCurrentState(function(err, state) {
 		if(err || typeof(state) === 'undefined') {
-			console.log('Couldn\'t fetch track state. Searching for SONOS device again.');
+			console.log('Couldn\'t fetch track state.');
 			console.log(err, state);
-			sonosDevice = false;
-			sonos.search(deviceSearchCallback);
+			currentState = 'stopped';
 		} else {
 			currentState = state;
-
-			setTimeout(function() {
-				currentStatePoll();
-			}, sonosDataPollInterval);
 		}
+
+		setTimeout(function() {
+			currentStatePoll();
+		}, sonosDataPollInterval);
 	});
 }
 
 function currentVolumePoll() {
 	console.log('Polling volume');
 
-	if(sonosDevice === false || typeof sonosDevice.getVolume !== 'function') {
-		sonos.search(deviceSearchCallback);
-		currentVolume = 0;
+	if(typeof sonosDevice.getVolume !== 'function') {
+		setTimeout(function() {
+			currentVolumePoll();
+		}, sonosDataPollInterval);
 		return;
 	}
 
 	sonosDevice.getVolume(function(err, volume) {
 		if(err || typeof(volume) === 'undefined') {
-			console.log('Couldn\'t fetch volume. Searching for SONOS device again.');
+			console.log('Couldn\'t fetch volume.');
 			console.log(err, volume);
-			sonosDevice = false;
-			sonos.search(deviceSearchCallback);
+			currentVolume = 0;
 		} else {
 			currentVolume = volume;
-
-			setTimeout(function() {
-				currentVolumePoll();
-			}, sonosDataPollInterval);
 		}
+
+		setTimeout(function() {
+			currentVolumePoll();
+		}, sonosDataPollInterval);
 	});
 }
