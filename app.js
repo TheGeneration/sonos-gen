@@ -45,7 +45,7 @@ server.listen(PORT, function() {
 });
 
 // var sonosDevicePollInterval = 30 * 1000;
-var sonosDataPollInterval = 1000;
+var sonosDataPollInterval = 1000 * 15;
 
 var sonosDevice = false;
 
