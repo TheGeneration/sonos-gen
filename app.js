@@ -1,6 +1,6 @@
 const env = require('node-env-file'),
 	http = require('http'),
-	tls = require('tls'),
+	https = require('https'),
 	fs = require('fs'),
 	crypto = require('crypto'),
 	sonos = require('sonos');
@@ -32,9 +32,9 @@ if(process.env.USE_SSL) {
 		cert: cert
 	};
 
-	tls.createServer(serverOptions);
+	server = https.createServer(serverOptions);
 } else {
-	http.createServer();
+	server = http.createServer();
 }
 
 server.addListener('request', handleRequest);
