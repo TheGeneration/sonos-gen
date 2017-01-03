@@ -70,7 +70,7 @@ function initDataPoll() {
 }
 
 function currentTrackPoll() {
-	if(sonosDevice === false) {
+	if(sonosDevice === false || typeof sonosDevice.currentTrack !== 'function') {
 		sonos.search(deviceSearchCallback);
 	}
 
@@ -94,7 +94,7 @@ function currentTrackPoll() {
 }
 
 function currentStatePoll() {
-	if(sonosDevice === false) {
+	if(sonosDevice === false || typeof sonosDevice.getCurrentState !== 'function') {
 		sonos.search(deviceSearchCallback);
 	}
 
