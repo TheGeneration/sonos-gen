@@ -11,19 +11,21 @@ const PORT = 7544;
 
 var currentTrack = {};
 var currentState = 'paused';
+var currentVolume = 0;
 
 function handleRequest(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.end(JSON.stringify({
 		'track': currentTrack,
-		'state': currentState
+		'state': currentState,
+		'volume': currentVolume
 	}));
 }
 
 var server;
 
-if(process.env.USE_SSL) {
+if(process.env.USE_SSL != 'false') {
 	var privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_FILE).toString();
 	var cert = fs.readFileSync(process.env.CERT_CERTIFICATE_FILE).toString();
 
@@ -67,6 +69,7 @@ sonos.search(deviceSearchCallback);
 function initDataPoll() {
 	currentTrackPoll();
 	currentStatePoll();
+	currentVolumePoll();
 }
 
 function currentTrackPoll() {
@@ -118,6 +121,31 @@ function currentStatePoll() {
 
 			setTimeout(function() {
 				currentStatePoll();
+			}, sonosDataPollInterval);
+		}
+	});
+}
+
+function currentVolumePoll() {
+	console.log('Polling volume');
+
+	if(sonosDevice === false || typeof sonosDevice.getVolume !== 'function') {
+		sonos.search(deviceSearchCallback);
+		currentVolume = 0;
+		return;
+	}
+
+	sonosDevice.getVolume(function(err, volume) {
+		if(err || typeof(volume) === 'undefined') {
+			console.log('Couldn\'t fetch volume. Searching for SONOS device again.');
+			console.log(err, volume);
+			sonosDevice = false;
+			sonos.search(deviceSearchCallback);
+		} else {
+			currentVolume = volume;
+
+			setTimeout(function() {
+				currentVolumePoll();
 			}, sonosDataPollInterval);
 		}
 	});
