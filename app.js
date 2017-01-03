@@ -79,6 +79,7 @@ function currentTrackPoll() {
 	sonosDevice.currentTrack(function(err, track) {
 		if(err || typeof(track.title) === 'undefined') {
 			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
+			console.log(err, track);
 			sonosDevice = false;
 			sonos.search(deviceSearchCallback);
 		} else {
@@ -104,7 +105,8 @@ function currentStatePoll() {
 
 	sonosDevice.getCurrentState(function(err, state) {
 		if(err || typeof(state) === 'undefined') {
-			console.log('Couldn\'t fetch track title. Searching for SONOS device again.');
+			console.log('Couldn\'t fetch track state. Searching for SONOS device again.');
+			console.log(err, state);
 			sonosDevice = false;
 			sonos.search(deviceSearchCallback);
 		} else {
