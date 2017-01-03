@@ -1,10 +1,11 @@
-const http = require('http'),
+const env = require('node-env-file'),
+	http = require('http'),
 	tls = require('tls'),
 	fs = require('fs'),
 	crypto = require('crypto'),
 	sonos = require('sonos');
 
-
+env(__dirname + '/.env');
 
 const PORT = 7544;
 
