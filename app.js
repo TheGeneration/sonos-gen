@@ -72,6 +72,8 @@ function initDataPoll() {
 function currentTrackPoll() {
 	if(sonosDevice === false || typeof sonosDevice.currentTrack !== 'function') {
 		sonos.search(deviceSearchCallback);
+		currentTrack = {};
+		return;
 	}
 
 	sonosDevice.currentTrack(function(err, track) {
@@ -96,6 +98,8 @@ function currentTrackPoll() {
 function currentStatePoll() {
 	if(sonosDevice === false || typeof sonosDevice.getCurrentState !== 'function') {
 		sonos.search(deviceSearchCallback);
+		currentState = 'stopped';
+		return;
 	}
 
 	sonosDevice.getCurrentState(function(err, state) {
