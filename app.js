@@ -78,6 +78,9 @@ function currentTrackPoll() {
 	console.log('Polling track');
 
 	if(typeof sonosDevice.currentTrack !== 'function') {
+
+		sonosDevice = new sonos.Sonos(sonosDevice.host, sonosDevice.port);
+
 		setTimeout(function() {
 			currentTrackPoll();
 		}, sonosDataPollInterval);
