@@ -109,10 +109,10 @@ function currentTrackPoll() {
 			sonos.search(deviceSearchCallback);
 			sonosDevice = false;
 
-			return;
-
 			console.log('Couldn\'t fetch track title.');
 			console.log(err, track);
+
+			return;
 		} else {
 			currentTrack = {
 				name: track.artist + ' - ' + track.title,
