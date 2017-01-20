@@ -75,9 +75,10 @@ function initDataPoll() {
 }
 
 function currentTrackPoll() {
-	console.log('Polling track');
+	// console.log('Polling track');
 
 	if(typeof sonosDevice.currentTrack !== 'function') {
+		console.log('Current Track is not a function. Re-scheduling...');
 
 		sonosDevice = new sonos.Sonos(sonosDevice.host, sonosDevice.port);
 
@@ -106,7 +107,7 @@ function currentTrackPoll() {
 }
 
 function currentStatePoll() {
-	console.log('Polling state');
+	// console.log('Polling state');
 
 	if(typeof sonosDevice.getCurrentState !== 'function') {
 		setTimeout(function() {
@@ -131,7 +132,7 @@ function currentStatePoll() {
 }
 
 function currentVolumePoll() {
-	console.log('Polling volume');
+	// console.log('Polling volume');
 
 	if(typeof sonosDevice.getVolume !== 'function') {
 		setTimeout(function() {
