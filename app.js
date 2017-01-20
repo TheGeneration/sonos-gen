@@ -68,10 +68,20 @@ function deviceSearchCallback(device) {
 console.log('Searching for SONOS device...');
 sonos.search(deviceSearchCallback);
 
+var pollTimeouts = [];
+
 function initDataPoll() {
 	currentTrackPoll();
 	currentStatePoll();
 	currentVolumePoll();
+}
+
+function clearPollTimeouts() {
+	for(var i in pollTimeouts) {
+		clearTimeout(pollTimeouts[i]);
+	}
+
+	pollTimeouts = [];
 }
 
 function currentTrackPoll() {
@@ -82,14 +92,25 @@ function currentTrackPoll() {
 
 		sonosDevice = new sonos.Sonos(sonosDevice.host, sonosDevice.port);
 
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
+			pollTimeouts.splice(pollTimeouts.indexOf(timeoutId), 1);
 			currentTrackPoll();
 		}, sonosDataPollInterval);
+
+		pollTimeouts.push(timeoutId);
+
 		return;
 	}
 
 	request = sonosDevice.currentTrack(function(err, track) {
 		if(err || typeof(track.title) === 'undefined') {
+			clearPollTimeouts();
+
+			sonos.search(deviceSearchCallback);
+			sonosDevice = false;
+
+			return;
+
 			console.log('Couldn\'t fetch track title.');
 			console.log(err, track);
 		} else {
@@ -100,9 +121,12 @@ function currentTrackPoll() {
 			};
 		}
 
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
+			pollTimeouts.splice(pollTimeouts.indexOf(timeoutId), 1);
 			currentTrackPoll();
 		}, sonosDataPollInterval);
+
+		pollTimeouts.push(timeoutId);
 	});
 }
 
@@ -110,9 +134,13 @@ function currentStatePoll() {
 	// console.log('Polling state');
 
 	if(typeof sonosDevice.getCurrentState !== 'function') {
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
+			pollTimeouts.splice(pollTimeouts.indexOf(timeoutId), 1);
 			currentStatePoll();
 		}, sonosDataPollInterval);
+
+		pollTimeouts.push(timeoutId);
+
 		return;
 	}
 
@@ -125,9 +153,12 @@ function currentStatePoll() {
 			currentState = state;
 		}
 
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
+			pollTimeouts.splice(pollTimeouts.indexOf(timeoutId), 1);
 			currentStatePoll();
 		}, sonosDataPollInterval);
+
+		pollTimeouts.push(timeoutId);
 	});
 }
 
@@ -135,9 +166,13 @@ function currentVolumePoll() {
 	// console.log('Polling volume');
 
 	if(typeof sonosDevice.getVolume !== 'function') {
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
+			pollTimeouts.splice(pollTimeouts.indexOf(timeoutId), 1);
 			currentVolumePoll();
 		}, sonosDataPollInterval);
+
+		pollTimeouts.push(timeoutId);
+
 		return;
 	}
 
@@ -150,8 +185,11 @@ function currentVolumePoll() {
 			currentVolume = volume;
 		}
 
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
+			pollTimeouts.splice(pollTimeouts.indexOf(timeoutId), 1);
 			currentVolumePoll();
 		}, sonosDataPollInterval);
+
+		pollTimeouts.push(timeoutId);
 	});
 }
